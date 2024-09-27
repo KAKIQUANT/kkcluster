@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  jupyterhub:
+    build: ./jupyterhub
+    image: kkcluster/jupyterhub:latest
+    container_name: jupyterhub
+    restart: always
+    networks:
+      - kkcluster_network
+    environment:
+      - OAUTH_CLIENT_ID
+      - OAUTH_CLIENT_SECRET
+      - OAUTH_CALLBACK_URL
+    ports:
+      - "8000:8000"
+    volumes:
+      - jupyterhub-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock  # Needed for DockerSpawner
+
+  nginx:
+    build: ./nginx
+    image: kkcluster/nginx:latest
+    container_name: nginx
+    restart: always
+    networks:
+      - kkcluster_network
+    ports:
+      - "80:80"
+    depends_on:
+      - jupyterhub
+
+networks:
+  kkcluster_network:
+
+volumes:
+  jupyterhub-data:
